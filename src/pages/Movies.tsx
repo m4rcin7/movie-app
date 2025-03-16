@@ -17,17 +17,24 @@ interface Movies {
 export function Movies() {
   const [movies, setMovies] = useState<Movies[]>([]);
   const [searchMovie, setSearchMovie] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = () => {
-    axios.get(`${popular}?api_key=${apiKey}`).then((response) => {
-      const result = response.data.results;
-      setMovies(result);
-    });
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${popular}?api_key=${apiKey}`);
+      setMovies(response.data.results);
+    } catch (err) {
+      setError("Failed to fetch movies.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,41 +50,80 @@ export function Movies() {
   };
 
   return (
-    <div className="md:w-full">
-      <div className="m-auto w-[500px] md:w-max flex justify-center items-center bg-slate-300 rounded-md">
+    <div className="min-h-screen w-full bg-gray-900 text-white flex flex-col items-center py-10 px-4">
+      {/* Search */}
+      <div className="w-full max-w-3xl mb-10 flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-full px-4 shadow-md">
         <InputBase
-          placeholder="Search"
+          placeholder="Search movies..."
           value={searchMovie}
           onChange={handleSearchChange}
-          className="p-2 w-full text-bold"
+          className="flex-1 py-2 text-white placeholder-gray-400"
+          inputProps={{ style: { color: "white" } }}
         />
-        <IconButton type="submit">
-          <SearchIcon />
+        <IconButton>
+          <SearchIcon className="text-white" />
         </IconButton>
       </div>
-      <div className="mt-10 flex flex-wrap gap-5 items-center justify-center">
+
+      {/* Loading & Error */}
+      {loading && <p className="text-center text-gray-400">Loading...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
+
+      {/* Movies */}
+      <div
+        className="
+          flex
+          flex-wrap
+          justify-center
+          gap-8
+          w-full
+          max-w-[1600px]
+        "
+      >
         {filteredMovies.map((film) => (
           <div
             key={film.id}
-            className="p-5  flex flex-col gap-5 bg-slate-600 rounded-lg"
+            className="
+              bg-gray-800
+              rounded-2xl
+              overflow-hidden
+              shadow-lg
+              flex flex-col
+              items-center
+              transition-transform
+              hover:scale-105
+              duration-300
+              w-[230px]
+              sm:w-[250px]
+              md:w-[260px]
+              lg:w-[280px]
+            "
           >
-            <h3 className="text-xl font-bold text-violet-400">{film.title}</h3>
             {film.poster_path && (
               <img
                 src={`https://image.tmdb.org/t/p/w300${film.poster_path}`}
-                alt={`${film.title}`}
+                alt={film.title}
+                className="w-full h-[370px] object-cover"
               />
             )}
-            <h4 className="text-xl font-bold text-violet-300">
-              Date: {film.release_date}
-            </h4>
-            <Button
-              onClick={() => handleMovieCart(film.id)}
-              variant="contained"
-              color="secondary"
-            >
-              See more...
-            </Button>
+            <div className="p-4 flex flex-col items-center gap-3 flex-grow justify-between">
+              <h3 className="text-lg font-bold text-center">{film.title}</h3>
+              <p className="text-gray-400 text-sm">Release: {film.release_date}</p>
+              <Button
+                onClick={() => handleMovieCart(film.id)}
+                variant="contained"
+                color="secondary"
+                className="w-full"
+                sx={{
+                  backgroundColor: '#7c3aed',
+                  '&:hover': {
+                    backgroundColor: '#6d28d9',
+                  },
+                }}
+              >
+                See more...
+              </Button>
+            </div>
           </div>
         ))}
       </div>
