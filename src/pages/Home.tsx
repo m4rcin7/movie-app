@@ -27,7 +27,7 @@ export function Home() {
 
   return (
     <main className="container mx-auto py-10 px-4">
-      <h1 className="text-4xl font-bold text-center mb-12">Popularne Filmy</h1>
+      <h1 className="text-4xl font-bold text-center mb-12">Popular videos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {movieList.map((film) => (
           <div
@@ -37,7 +37,7 @@ export function Home() {
             {film.poster_path && (
               <img
                 className="w-full h-auto object-cover"
-                src={`https://image.tmdb.org/t/p/w500${film.poster_path}`} // Zwiększona rozdzielczość
+                src={`https://image.tmdb.org/t/p/w500${film.poster_path}`}
                 alt={film.title}
               />
             )}
